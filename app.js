@@ -15,7 +15,7 @@ const Room = require('./models/room');
 dotenv.config();
 
 const app = express();
-const PORT = process.env.PORT || 5000;
+const PORT = 5000;
 
 // Middleware
 app.use(express.static(path.join(__dirname, "public")));
