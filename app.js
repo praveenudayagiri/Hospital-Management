@@ -46,6 +46,11 @@ const generateToken = (user) => {
   );
 };
 
+
+
+app.get("/", (req, res) => {
+  res.send("<h1>HI</h1>");
+});
 // Routes
 app.get("/", (req, res) => {
   res.render("index");
