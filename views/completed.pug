@@ -1,0 +1,97 @@
+doctype html
+html(lang="en")
+  head
+    meta(charset="UTF-8")
+    meta(name="viewport" content="width=device-width, initial-scale=1.0")
+    title Consulted Patients
+    link(rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css")
+    link(rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css")
+    link(href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet")
+    link(rel="stylesheet" href="/assests/css/completed.css")
+  body
+    header
+      .header-container
+        .logo
+          .image
+            i.fas.fa-hospital(style='font-size:60px')
+          .heading PULSECARE
+            .subheading Where Every Beat Matters
+        .sub
+          nav
+            ul
+              li
+                a(href="/mypatients") Patients
+              li
+                a(href="/completed") History
+              li#log
+                a#log1(href="/login") Logout
+
+    section.consulted-patients
+      h1 Consulted Patients
+      p These are the patients you have already consulted.
+
+      //- Container for displaying patients
+      .patients-list#patientsList
+
+    //- JavaScript to fetch and display consulted patients
+    script.
+      async function fetchConsultedPatients() {
+        try {
+          const response = await fetch('/consulted', {
+            method: 'GET',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+          });
+
+          if (!response.ok) {
+            throw new Error('Failed to load consulted patients.');
+          }
+
+          const data = await response.json();
+          
+          // Check if the response contains a message instead of patient data
+          if (data.message) {
+            document.getElementById('patientsList').innerHTML = `<p>${data.message}</p>`;
+          } else {
+            displayConsultedPatients(data);
+          }
+        } catch (error) {
+          console.error('Error fetching consulted patients:', error);
+          document.getElementById('patientsList').innerHTML = '<p style="color: red;">Error loading patients.</p>';
+        }
+      }
+
+      function displayConsultedPatients(patients) {
+        const patientsListDiv = document.getElementById('patientsList');
+        patientsListDiv.innerHTML = ''; // Clear previous results
+
+        if (patients.length === 0) {
+          patientsListDiv.innerHTML = '<p>No consulted patients found.</p>';
+          return;
+        }
+
+        patients.forEach((appointment) => {
+          const patientCard = document.createElement('div');
+          patientCard.className = 'patient-card';
+
+          patientCard.innerHTML = `
+            <div class="card-header">
+              <h2>${appointment.patient.userName}</h2>
+              <p class="email"><i class="fas fa-envelope"></i> ${appointment.patient.emailId}</p>
+            </div>
+            <div class="card-body">
+              <p><strong>Age:</strong> ${appointment.patient.age}</p>
+              <p><strong>Gender:</strong> ${appointment.patient.gender}</p>
+              <p><strong>Contact:</strong> ${appointment.patient.contactNumber}</p>
+              <p><strong>Problem:</strong> ${appointment.problemDescription}</p>
+              <p><strong>Appointment Date:</strong> ${new Date(appointment.appointmentDate).toLocaleDateString()}</p>
+              <p><strong>Appointment Time:</strong> ${appointment.appointmentTime}</p>
+            </div>
+          `;
+
+          patientsListDiv.appendChild(patientCard);
+        });
+      }
+
+      window.onload = fetchConsultedPatients;

@@ -1,0 +1,57 @@
+doctype html
+html(lang="en")
+  head
+    meta(charset="UTF-8")
+    meta(name="viewport" content="width=device-width, initial-scale=1.0")
+    link(rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css")
+    link(href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet")
+    link(rel="stylesheet" href="/assests/css/register_style.css")
+    title Registration
+
+  body
+    header
+      .header-container
+        .logo
+          .image
+            i.fas.fa-hospital(style='font-size:60px')
+          .heading PULSECARE
+            .subheading Where Every Beat Matters
+        .sub
+          nav
+            ul
+              li
+                a(href="/") Home
+              li#log
+                a#log1(href="/login") Login/Register
+
+    .register-container
+      h2 Register
+      form#registrationForm(onsubmit="return submitRegistration(event);")
+        .input-group
+          label(for="userType") I am a:
+          select#userType(name="userType" onchange="showDynamicFields()" required)
+            option(value="") Select User Type
+            option(value="doctor") Doctor
+            option(value="patient") Patient
+            option(value="admin") Admin
+
+        #dynamicFields
+
+        .input-group
+          label(for="email") Email:
+          input(type="email" id="email" name="emailId" placeholder="Enter your email" required)
+
+        .input-group
+          label(for="password") Password:
+          input(type="password" id="password" name="password" placeholder="Enter your password" required)
+
+        button(type="submit" class="register-btn") Register
+
+      .login-section
+        p Already have an account? 
+          a(href="/login" class="login-link") Login here
+
+      p#errorMessageElement(style="display:none; color: red;")
+
+    script(src="/assests/js/register_script.js") // Add path to the external JavaScript file or place the script here
+

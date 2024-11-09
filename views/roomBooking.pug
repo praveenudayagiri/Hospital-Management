@@ -1,0 +1,163 @@
+doctype html
+html(lang="en")
+  head
+    meta(charset="UTF-8")
+    meta(name="viewport" content="width=device-width, initial-scale=1.0")
+    title Room Booking Dashboard
+    link(rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css")
+    link(rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css")
+    link(href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap", rel="stylesheet")
+    link(rel="stylesheet" href="/assests/css/roomBooking.css")
+  body
+    header
+      .header-container
+        .logo
+          .image
+            i.fas.fa-hospital(style='font-size:60px')
+          .heading PULSECARE
+            .subheading Where Every Beat Matters
+        .sub
+          nav
+            ul
+              li
+                a(href="/roombooking") Dashboard
+                a(href="/unconsultedpatients") Unconsulted
+                a(href="/consultedpaients") Consulted
+                a(href="/list") Employees
+              li#log
+                a#log1(href="/login") Logout
+
+    section.room-dashboard
+      h1 Room Booking Dashboard
+      p#availableRooms Available Rooms: 0
+      p#vacantRooms Vacant Rooms: 0
+
+      //- Rooms container
+      .rooms-container
+        //- Room boxes will be dynamically created here
+        if rooms && rooms.length > 0
+          each room in rooms
+            .room-box(class=(room.isVacant ? 'vacant' : 'not-vacant') data-room-number=room.roomNumber)
+              h3 Room #{room.roomNumber}
+              if room.isVacant
+                button.book-room(data-room-number=room.roomNumber) Book Room
+              else
+                button.vacant-room(data-room-number=room.roomNumber) Vacant
+        else
+          p No rooms available.
+
+    //- Form to book a room
+    .book-room-form
+      h2 Book a Room
+      form#bookRoomForm(action="/book-room" method="POST")
+        label(for="patientUserName") Patient Username:
+        input#patientUserName(type="text" name="patientUserName" required)
+        label(for="roomNumber") Room Number:
+        input#roomNumber(type="text" name="roomNumber" readonly)
+        button(type="submit") Submit
+
+    //- JavaScript to handle dynamic room booking
+    script.
+      // Function to fetch room data
+      async function fetchRooms() {
+        try {
+          const response = await fetch('/rooms', {
+            method: 'GET',
+            headers: {
+              'Content-Type': 'application/json',
+            }
+          });
+          const data = await response.json();
+
+          // Update room count
+          document.getElementById('availableRooms').innerText = 'Available Rooms: ' + data.availableRooms;
+          document.getElementById('vacantRooms').innerText = 'Vacant Rooms: ' + data.vacantRooms;
+
+          // Dynamically create room boxes
+          const roomContainer = document.querySelector('.rooms-container');
+          roomContainer.innerHTML = '';
+          data.rooms.forEach(room => {
+            const roomBox = document.createElement('div');
+            roomBox.className = `room-box ${room.isVacant ? 'vacant' : 'not-vacant'}`;
+            roomBox.innerHTML = `
+              <h3>Room ${room.roomNumber}</h3>
+              ${room.isVacant 
+                ? `<button class="book-room" data-room-number="${room.roomNumber}">Book Room</button>` 
+                : `<button class="vacant-room" data-room-number="${room.roomNumber}">Vacant</button>`}`;
+            
+            roomContainer.appendChild(roomBox);
+          });
+
+          // Add event listeners for booking and vacating rooms
+          document.querySelectorAll('.book-room').forEach(button => {
+            button.addEventListener('click', event => {
+              const roomNumber = event.target.getAttribute('data-room-number');
+              document.getElementById('roomNumber').value = roomNumber;
+            });
+          });
+
+          document.querySelectorAll('.vacant-room').forEach(button => {
+            button.addEventListener('click', async event => {
+              const roomNumber = event.target.getAttribute('data-room-number');
+              await vacateRoom(roomNumber);
+            });
+          });
+        } catch (error) {
+          console.error('Error fetching rooms:', error);
+        }
+      }
+
+      // Function to handle vacating a room
+      async function vacateRoom(roomNumber) {
+        try {
+          const response = await fetch('/vacant-room', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ roomNumber })
+          });
+
+          if (response.ok) {
+            alert('Room vacated successfully!');
+            fetchRooms();
+          } else {
+            const data = await response.json();
+            alert('Failed to vacate room: ' + data.error);
+          }
+        } catch (error) {
+          console.error('Error vacating room:', error);
+        }
+      }
+
+      // Fetch rooms on page load
+      window.onload = fetchRooms;
+
+    script.
+      // Handle room booking form submission
+      document.getElementById('bookRoomForm').addEventListener('submit', async (event) => {
+        event.preventDefault();
+
+        const patientUserName = document.getElementById('patientUserName').value;
+        const roomNumber = document.getElementById('roomNumber').value;
+
+        try {
+          const response = await fetch('/book-room', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ patientUserName, roomNumber })
+          });
+
+          if (response.ok) {
+            alert('Room booked successfully!');
+            fetchRooms();
+          } else {
+            const data = await response.json();
+            alert('Failed to book room: ' + data.error);
+          }
+        } catch (error) {
+          console.error('Error booking room:', error);
+        }
+      });

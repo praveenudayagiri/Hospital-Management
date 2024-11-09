@@ -1,0 +1,81 @@
+doctype html
+html(lang="en")
+  head
+    title Unconsulted Patients
+    link(rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css")
+    link(rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css")
+    link(href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap", rel="stylesheet")
+    link(rel="stylesheet" href="/assests/css/unconsultedPatients.css")
+    script(src="https://code.jquery.com/jquery-3.6.0.min.js") 
+    script.
+      $(document).ready(async function() {
+        try {
+          const response = await fetch('/patientsconsulted', {
+            method: 'GET',
+            headers: {
+              'Content-Type': 'application/json',
+            }
+          });
+
+          if (!response.ok) {
+            throw new Error('Network response was not ok');
+          }
+
+          const data = await response.json();
+          const container = $('#patients-container');
+          $('#patient-count').text(data.length);
+          data.forEach(appointment => {
+            const appointmentDate = new Date(appointment.appointmentDate).toLocaleDateString('en-US', {
+              year: 'numeric',
+              month: '2-digit',
+              day: '2-digit'
+            });
+            const patientCard = `
+              <div class="patient-card">
+                <h3>Doctor: ${appointment.doctor}</h3>
+                <p><strong>Appointment Date:</strong> ${appointmentDate}</p>
+                <p><strong>Appointment Time:</strong> ${appointment.appointmentTime}</p>
+                <p><strong>Problem Description:</strong> ${appointment.problemDescription}</p>
+                <h4>Patient Details</h4>
+                <p><strong>Name:</strong> ${appointment.patient.userName}</p>
+                <p><strong>Email:</strong> ${appointment.patient.emailId}</p>
+                <p><strong>Age:</strong> ${appointment.patient.age}</p>
+                <p><strong>Gender:</strong> ${appointment.patient.gender}</p>
+                <p><strong>Contact Number:</strong> ${appointment.patient.contactNumber}</p>
+              </div>
+            `;
+            container.append(patientCard);
+          });
+        } catch (error) {
+          console.error("Error fetching patients:", error);
+          $('#patients-container').html('<p>Failed to load data. Please try again later.</p>');
+        }
+      });
+  body
+    header
+      .header-container
+        .logo
+          .image
+            i.fas.fa-hospital(style='font-size:60px')
+          .heading PULSECARE
+            .subheading Where Every Beat Matters
+        .nav-container 
+          nav
+            ul
+              li
+                a(href="/roombooking") Dashboard
+              li
+                a(href="/unconsultedpatients") Unconsulted
+              li
+                a(href="/consultedpatients") Consulted
+              li
+                a(href="/list") Employees
+              li#log
+                a#log1(href="/login") Logout
+    
+    .heading-container(style='display: flex;flex-direction: column; justify-content: space-between; align-items: center;')
+      h2 Unconsulted Patients List 
+      p There are <span id="patient-count" class="patient-count">0</span> consulted patients. 
+    #patients-container.container 
+    #patients-container.container 
+      // Patient cards will be dynamically injected here
