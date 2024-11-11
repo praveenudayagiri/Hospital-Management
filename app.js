@@ -29,13 +29,7 @@ app.set("view engine", "pug");
 app.set("views", path.join(__dirname, "views"));
 
 // Connect to MongoDB
-connectDB()
-  .then(() => {
-    console.log("Database connection established...");
-  })
-  .catch((err) => {
-    console.error("Database connection failed:", err);
-  });
+connectDB();
 
 // Function to generate JWT token
 const generateToken = (user) => {
