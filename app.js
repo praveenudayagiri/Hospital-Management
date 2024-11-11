@@ -35,7 +35,7 @@ connectDB();
 const generateToken = (user) => {
   return jwt.sign(
     { id: user._id, email: user.emailId, userType: user.userType }, 
-    "VISWA@ch$12323", // Hardcoded secret key
+    "PRAVEEN$12323", // Hardcoded secret key
     { expiresIn: "5h" }
   );
 };
